@@ -3,6 +3,7 @@ scriptAuthor = "Swizzy"
 scriptVersion = 1
 scriptDescription = "Swizzy's Language Pack Downloader, downloads Language Packs compatible with your version of Aurora"
 scriptPermissions = { "http", "filesystem" }
+scriptIcon = "icon.png"
 
 require("MenuSystem");
 
