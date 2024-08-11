@@ -1,7 +1,7 @@
 scriptTitle = "Homebrew Store"
 scriptAuthor = "Derf / Cheato"
 scriptVersion = 2.0
-scriptDescription = "Download homebrew from ConsoleMods.org and other repos!"
+scriptDescription = "Homebrew store!"
 scriptIcon = "icon.png"
 scriptPermissions = { "http", "sql", "filesystem" }
 --Built from AuroraRepo. Please be gentle :)
@@ -13,10 +13,10 @@ downloadsPath = "Downloads\\";
 -- Main entry point to script
 function main()
 	if Aurora.HasInternetConnection() ~= true then
-		Script.ShowMessageBox("ERROR", "ERROR: This script requires an active internet connection to work...\n\nPlease make sure you have internet to your console before running the script", "OK");
+		Script.ShowMessageBox("ERRO", "ERRO: Este script requer uma conexão ativa com a Internet para funcionar...\n\nCertifique-se de ter internet no seu console antes de executar o script", "OK");
 		return;
 	end
-	print("-- " .. scriptTitle .. " Started...");
+	print("-- " .. scriptTitle .. " Iniciando...");
 	
 	if init() == false then
 		goto scriptend;
@@ -26,7 +26,7 @@ function main()
 	DoShowMenu();
 
 	if reloadRequired then
-		local ret = Script.ShowMessageBox("Aurora Reload Required", "A Reload is required for your changes to take effect\n\nDo you want to reload Aurora now?", "Yes", "No");
+		local ret = Script.ShowMessageBox("Reinicio de Aurora necessária", "É necessário recarregar para que suas alterações tenham efeito\n\nVocê quer recarregar o Aurora agora?", "Sim", "Não");
 		if ret.Button == 1 then
 			Aurora.Restart();
 		end
@@ -34,7 +34,7 @@ function main()
 	
 	::mainend::
 	FileSystem.DeleteDirectory(absoluteDownloadsPath);
-	print("-- " .. scriptTitle .. " Ended...");
+	print("-- " .. scriptTitle .. " Terminou...");
 	::scriptend::
 end
 
@@ -44,13 +44,13 @@ function init()
 	FileSystem.DeleteDirectory(absoluteDownloadsPath);
 
 	-- Update saved repos
-	Script.SetStatus("Updating repos...");
+	Script.SetStatus("Atualizando repo...");
 	Script.SetProgress(5);
 	local updatingIndex = 0;
 	local repos = FileSystem.GetFiles( Script.GetBasePath() .. "Repos\\*" );
 	for i, repo in pairs(repos) do
 		local repoDisplayName = repo.Name:gsub("%.ini$", "");
-		Script.SetStatus("Updating " .. repoDisplayName .. "...");
+			Script.SetStatus("Atualizando " .. repoDisplayName .. "...");
 		updatingIndex = updatingIndex + 1;
 
 		if updatingIndex < 6 then
@@ -58,14 +58,14 @@ function init()
 		end
 		
 		local remoteRepoIniToUpdate = IniFile.LoadFile( "Repos\\" .. repo.Name);
-		local remoteRepoIniSection = remoteRepoIniToUpdate:GetSection("update");
+		local remoteRepoIniSection = remoteRepoIniToUpdate:GetSection("atualizar");
 
 		if remoteRepoIniSection ~= nil then
 			local repourl = remoteRepoIniSection.repourl;
 			if repourl ~= nil then
 				http = Http.Get(repourl, "\\Repos\\" .. repo.Name );
 				if not http.Success then
-					Script.ShowMessageBox("ERROR","Could not connect to " .. repoDisplayName,"OK");
+					Script.ShowMessageBox("ERRO","Não foi possível conectar a " .. repoDisplayName,"OK");
 				end
 			end
 		end
@@ -107,13 +107,13 @@ function DoShowMenu(menu)
 
 	if not canceled then
 		if Menu.IsMainMenu(menu) and menu.SubMenu == nil then
-			Script.SetStatus("Fetching listings...");
+			Script.SetStatus("Buscando listagens...");
 			local http, iniurl;
 			Script.SetProgress(0);
 
 			if (ret.iniurl == "PROMPT") then
 				-- Prompt user for URL to .ini file
-				local keyboardData = Script.ShowKeyboard( "Aurora Keyboard", "Enter the full URL to a valid .ini file", "https://", 0 );
+				local keyboardData = Script.ShowKeyboard( "Aurora Keyboard", "Insira o URL completo para um arquivo .ini válido", "https://", 0 );
 				if keyboardData.Canceled == false then 
 					iniurl = keyboardData.Buffer;
 				else
@@ -125,9 +125,9 @@ function DoShowMenu(menu)
 				local newRepoName = string.match(iniurl,"^https?://([^/]+)");
 				http = Http.Get(iniurl, "\\Repos\\" .. newRepoName .. ".ini" );
 				if http.Success then
-					Script.ShowNotification(newRepoName .. " repo installed!");
+					Script.ShowNotification(newRepoName .. " repo instalado!");
 				else
-					Script.ShowMessageBox("ERROR", "Failed to download .ini file:\n\n" .. iniurl, "OK");
+					Script.ShowMessageBox("ERRO", "Falha ao baixar o arquivo .ini:\n\n" .. iniurl, "OK");
 				end
 
 				return
@@ -137,7 +137,7 @@ function DoShowMenu(menu)
 			end
 
 			if http.Success then
-				Script.SetStatus("Processing listings...");
+				Script.SetStatus("Processando listagens...");
 				Script.SetProgress(50);
 				local ini = IniFile.LoadString(http.OutputData);
 				
@@ -153,7 +153,7 @@ function DoShowMenu(menu)
 					end
 				end
 			else
-				Script.ShowMessageBox("ERROR", "An error occurred while downloading store data...\n\nPlease try again later", "OK");
+				Script.ShowMessageBox("ERRO", "Ocorreu um erro ao baixar os dados da loja...\n\nPor favor, tente novamente mais tarde", "OK");
 				DoShowMenu(menu);
 				return;
 			end
@@ -166,7 +166,7 @@ function DoShowMenu(menu)
 			-- Content item selected
 			HandleSelection(ret, menu.Parent.Data, menu);
 		else
-			Script.ShowMessageBox("ERROR", "An unknown error occurred!\n\nExiting...", "OK");
+			Script.ShowMessageBox("ERRO", "Ocorreu um erro desconhecido!\n\nSaindo...", "OK");
 		end
 	end
 end
@@ -197,8 +197,8 @@ function HandleSelection(selection, repo, menu)
 		info = info .. "Description:\n" .. string.gsub(selection.itemDescription, "\\n", "\n") .. "\n\n";
 	end
 
-	info = info .. "\n\n\nDo you want to install this ".. repo.type .."?";
-	local ret = Script.ShowMessageBox("", info, "Yes", "No");
+	info = info .. "\n\n\nVocê quer instalar isso ".. repo.type .."?";
+	local ret = Script.ShowMessageBox("", info, "Sim", "Não");
 	if ret.Button == 1 then
 		if HandleInstallation(selection, destinationPath, repo.type) then
 			if repo.reload == "true" then
@@ -242,7 +242,7 @@ function GetDestinationPath(selection, type)
 	-- Emulator  - Installs to /Emulators/
 	-- Other     - Full path specified in .ini
 	-----------------------------------------------------
-	-- Official content - "Hdd1:\\Content\\0000000000000000\\";
+	-- Official content - "Usb0:\\Content\\0000000000000000\\";
 	
 	local applicationsDirectory = GetScanPath("App");
 	local homebrewDirectory = GetScanPath("Homebrew");
@@ -252,21 +252,21 @@ function GetDestinationPath(selection, type)
 		if applicationsDirectory ~= nil then
 			return applicationsDirectory .. selection.path;
 		else
-			return "Hdd1:\\Apps\\" .. selection.path;
+			return "Usb0:\\Apps\\" .. selection.path;
 		end
 	elseif type == "Game" then
-		return "Hdd1:\\Games\\" .. selection.path;
+		return "Usb0:\\Games\\" .. selection.path;
 	elseif type == "Emulator" then
 		if emulatorsDirectory ~= nil then
 			return emulatorsDirectory .. selection.path;
 		else
-			return "Hdd1:\\Emulators\\" .. selection.path;
+			return "Usb0:\\Emulators\\" .. selection.path;
 		end
 	elseif type == "Homebrew" then
 		if homebrewDirectory ~= nil then
 			return homebrewDirectory .. selection.path;
 		else
-			return "Hdd1:\\Homebrew\\" .. selection.path;
+			return "Usb0:\\Homebrew\\" .. selection.path;
 		end
 	else 
 		return selection.path;
@@ -276,7 +276,7 @@ end
 function HandleInstallation(selection, destinationPath, type)
 	if string.match(selection.path, "Usb0:") then
 		if not FileSystem.FileExists("Usb0:\\") then
-			Script.ShowMessageBox("ERROR","This download requires a USB flash drive. Please plug one in and retry.","OK");
+			Script.ShowMessageBox("ERRO","Este download requer uma unidade flash USB. Conecte uma e tente novamente.","OK");
 			return nil;
 		end
 	end
@@ -297,16 +297,16 @@ function HandleFileInstall(selection, destinationPath, type, checkExists)
 			end
 		end
 	end
-	Script.SetStatus("Downloading Content...");
+	Script.SetStatus("Baixando conteúdo...");
 	Script.SetProgress(10);
 	local dlpath = downloadsPath .. "tmp.bin";
 	local http = Http.Get(selection.dataurl, dlpath);
-	Script.SetStatus("Moving Content...");
+	Script.SetStatus("Movendo conteúdo...");
 	Script.SetProgress(50);
 	local successfulMove = FileSystem.MoveFile( absoluteDownloadsPath .. "tmp.bin", destinationPath .. selection.path, true);
 	Script.SetProgress(75);
 	FileSystem.DeleteDirectory(absoluteDownloadsPath);
-	Script.ShowNotification(selection.itemTitle .. " Installed");
+	Script.ShowNotification(selection.itemTitle .. " Instalado");
 	return false;
 end
 
@@ -320,7 +320,7 @@ function HandleZipInstall(selection, destinationPath, type, checkExists)
 		end
 	end
 	FileSystem.CreateDirectory( destinationPath .. string.match(selection.path, "^.+[\\]") );
-	Script.SetStatus("Downloading Content...");
+	Script.SetStatus("Baixando conteúdo...");
 	Script.SetProgress(10);
 	
 	local updatingIndex = 0;
@@ -344,35 +344,35 @@ function HandleZipInstall(selection, destinationPath, type, checkExists)
 				Script.SetProgress(loadingProgress+5);
 				local zip = ZipFile.OpenFile( dlpath );
 				if zip == nil then
-					Script.ShowMessageBox("ERROR", "Extraction failed!", "OK");
+					Script.ShowMessageBox("ERRO", "Extração falhou!", "OK");
 					return false;
 				end
-				Script.SetStatus("Decompressing Content...");
+				Script.SetStatus("Descompactando conteúdo...");
 				local result = zip.Extract( zip, downloadsPath .. "tmp\\" );
 				if result == false then
-					Script.ShowMessageBox("ERROR", "Extraction failed!", "OK");
+					Script.ShowMessageBox("ERRO", "Extração falhou!", "OK");
 				else
 					Script.SetProgress(loadingProgress+7);
-					Script.SetStatus("Installing Content...");
+					Script.SetStatus("Instalando conteúdo...");
 					local successfulMove = FileSystem.MoveDirectory( absoluteDownloadsPath .. "tmp\\", string.match(destinationPath, "^.+[\\]"), true);
 					Script.SetProgress(loadingProgress+9);
 
 					if successfulMove == true then
 						installSuccess = true;
 					else
-						Script.ShowMessageBox("ERROR", "Installation failed!", "OK");
+						Script.ShowMessageBox("ERRO", "A instalação falhou!", "OK");
 						FileSystem.DeleteDirectory(absoluteDownloadsPath);
 						return false;
 					end
 				end
 			else
-				Script.ShowMessageBox("ERROR", "Download failed\n\nPlease try again later...", "OK");
+				Script.ShowMessageBox("ERRO", "Falha no download\n\nPor favor, tente novamente mais tarde...", "OK");
 			end
 		end
 	end
 
 	if installSuccess == true then
-		Script.ShowNotification(selection.itemTitle .. " Installed");
+		Script.ShowNotification(selection.itemTitle .. " Instalado");
 	end
 
 	FileSystem.DeleteDirectory(absoluteDownloadsPath);
@@ -381,8 +381,8 @@ function HandleZipInstall(selection, destinationPath, type, checkExists)
 end
 
 function HandleAlreadyExists(type, name)
-	local msg = "There is a "..type.." already installed with the name:\n\n" .. name .. "\n\nDo you want to overwrite/replace it?";
-	local ret = Script.ShowMessageBox("Item Already Exists", msg, "No", "Yes");
+	local msg = "Já há um "..type.." instalado com o nome:\n\n" .. name .. "\n\nVocê quer substituí-lo/substituí-lo?";
+	local ret = Script.ShowMessageBox("Item já existe", msg, "Não", "Sim");
 	if ret.Canceled or ret.Button ~= 2 then
 		return false;
 	end
@@ -417,7 +417,7 @@ function HandleZipInstallUpdate(selection, path, type, checkExists)
 		if FileSystem.FileExists(installPath) then
 			if  not HandleAlreadyExists(type, filename) then
 				while FileSystem.FileExists(installPath) do
-					installPath, filename, canceled = GetNewName(filename, path, "Select new folder name:");
+					installPath, filename, canceled = GetNewName(filename, path, "Selecione o novo nome da pasta:");
 					if canceled then
 						return false; -- We're not going to continue trying this
 					end
@@ -425,36 +425,36 @@ function HandleZipInstallUpdate(selection, path, type, checkExists)
 			end
 		end
 	end
-	Script.SetStatus("Downloading Script...");
+	Script.SetStatus("Baixando o script...");
 	Script.SetProgress(0);
 	local dlpath = downloadsPath.."tmp.7z";
 	local http = Http.Get(selection.dataurl, dlpath);
 	if http.Success then
-		Script.SetStatus("Extracting Script...");
+		Script.SetStatus("Extraindo Script...");
 		Script.SetProgress(25);
 		local zip = ZipFile.OpenFile(dlpath);
 		if zip == nil then
-			Script.ShowMessageBox("ERROR", "Extraction failed!", "OK");
+			Script.ShowMessageBox("ERRO", "Extração falhou!", "OK");
 			return false;
 		end
 		local result = zip.Extract(zip, downloadsPath.."tmp\\");
 		FileSystem.DeleteFile(http.OutputPath);
 		if result == false then
-			Script.ShowMessageBox("ERROR", "Extraction failed!", "OK");
+			Script.ShowMessageBox("ERRO", "Extração falhou!", "OK");
 		else
-			Script.SetStatus("Installing Script...");
+			Script.SetStatus("Instalando o script...");
 			Script.SetProgress(75);
 			result = FileSystem.MoveDirectory(absoluteDownloadsPath.."tmp\\", installPath, true);
-			Script.SetStatus("Done! Returning to menu...");
+			Script.SetStatus("Pronto! Retornando ao menu...");
 			Script.SetProgress(100);
 			if result == true then
 				return true;
 			else
-				Script.ShowMessageBox("ERROR", "Installation failed!", "OK");
+				Script.ShowMessageBox("ERRO", "A instalação falhou!", "OK");
 			end
 		end
 	else
-		Script.ShowMessageBox("ERROR", "Download failed\n\nPlease try again later...", "OK");
+		Script.ShowMessageBox("ERRO", "Falha no download\n\nPor favor, tente novamente mais tarde...", "OK");
 	end
 	return false;
 end
