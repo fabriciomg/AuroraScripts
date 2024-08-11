@@ -1,7 +1,7 @@
 scriptTitle = "Homebrew Store"
-scriptAuthor = "Derf / Cheato"
+scriptAuthor = "Derf / Cheato / Fabricio"
 scriptVersion = 2.0
-scriptDescription = "Homebrew store!"
+scriptDescription = "Homebrew Store!"
 scriptIcon = "icon.png"
 scriptPermissions = { "http", "sql", "filesystem" }
 --Built from AuroraRepo. Please be gentle :)
